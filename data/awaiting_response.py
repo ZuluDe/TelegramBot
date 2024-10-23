@@ -27,32 +27,24 @@ async def find_and_extract(owner_id_to_find):
     connection = sqlite3.connect('data_base.db')
     cursor = connection.cursor()
 
-    # Выполнение запроса SELECT
     cursor.execute('SELECT * FROM awaiting_response WHERE owner_id = ?', (owner_id_to_find,))
     existing_row = cursor.fetchone()
 
     result_array = []
 
-    # Если строка существует
     if existing_row is not None:
-        # Получаем данные из столбца disliked_ids
         disliked_ids_str = existing_row[1]
 
-        # Проверяем, что disliked_ids_str не пуст и не None
+
         if disliked_ids_str is not None and disliked_ids_str != '':
-            # Разделяем строку по запятой и добавляем в массив
             result_array = disliked_ids_str.split(',')
 
-    # Возвращаем результат перед выполнением удаления
     connection.commit()
 
-    # Выполнение запроса DELETE
     cursor.execute("DELETE FROM awaiting_response WHERE owner_id = ?", (owner_id_to_find,))
 
-    # Снова возвращаем результат после удаления
     connection.commit()
 
-    # Закрываем соединение с базой данных
     connection.close()
 
     return result_array
