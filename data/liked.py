@@ -9,7 +9,6 @@ async def reciprocity(state):
     owner_id = data.get("id_user")
     other_id = data.get("id_other")
 
-    # Проверяем взаимность, используя функцию INSTR
     cur.execute("SELECT * FROM user_ratings WHERE owner_id = ? AND liked_id LIKE ?",
                 (owner_id, f'%{other_id}%'))
     result_id1 = cur.fetchone()
@@ -35,19 +34,14 @@ async def assess_profile_like(state):
     owner_id = data.get("id_user")
     other_id = data.get("id_other")
 
-    # Используем параметризованный запрос для безопасности
     cur.execute("SELECT * FROM user_ratings WHERE owner_id = ?", (owner_id,))
     existing_record = cur.fetchone()
 
     if existing_record is None:
-        # Если записи с owner_id нет, создаем новую
         cur.execute("INSERT INTO user_ratings (owner_id, liked_id) VALUES (?, ?)", (owner_id, other_id))
     else:
-        # Если запись с owner_id уже существует, извлекаем текущее значение liked_id
         liked_ids = existing_record[1]
-        # Если liked_id не пуст, добавляем запятую перед other_id
         liked_ids_str = liked_ids + ',' + other_id if liked_ids else other_id
-        # Обновляем запись
         cur.execute("UPDATE user_ratings SET liked_id = ? WHERE owner_id = ?", (liked_ids_str, owner_id))
 
     db.commit()
@@ -62,19 +56,14 @@ async def asses_profile_dislike(state):
     owner_id = data.get("id_user")
     other_id = data.get("id_other")
 
-    # Используем параметризованный запрос для безопасности
     cur.execute("SELECT * FROM user_ratings WHERE owner_id = ?", (owner_id,))
     existing_record = cur.fetchone()
 
     if existing_record is None:
-        # Если записи с owner_id нет, создаем новую
         cur.execute("INSERT INTO user_ratings (owner_id, disliked_id) VALUES (?, ?)", (owner_id, other_id))
     else:
-        # Если запись с owner_id уже существует, извлекаем текущее значение disliked_id
         disliked_ids = existing_record[1]
-        # Если disliked_id не пуст, добавляем запятую перед other_id
         disliked_ids_str = disliked_ids + ',' + other_id if disliked_ids else other_id
-        # Обновляем запись
         cur.execute("UPDATE user_ratings SET disliked_id = ? WHERE owner_id = ?", (disliked_ids_str, owner_id))
 
     db.commit()
